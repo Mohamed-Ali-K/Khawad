@@ -1,0 +1,111 @@
+program Khawad;
+var data : array[20] of byte;
+delim : string[3];
+i,j : integer;
+H : LONGINT;
+begin
+delim:='OK';
+TRISB:=0;
+PORTB:=0;
+TRISD:=$FF;
+ADCON1:=$80;
+USART_init(9600);
+usart_write_text('AT+CMGF=1');  // choix le text mode dans le module GSM
+usart_write(13); // Entre
+Delay_ms(1000);
+usart_write_text('AT+CNMI=1,2,0,0,0');
+usart_write(13);
+Delay_ms(1000);
+usart_write_text('AT+CMGS=+21623844488');
+usart_write(13);
+delay_ms(500);
+usart_write_text(' sefo diablo  ');
+usart_write(13);
+delay_ms(500);
+usart_write_text(' vs  ');
+usart_write(13);
+delay_ms(500);
+usart_write_text(' El Broton  ');
+usart_write(13);
+usart_write(26);
+while true do
+begin
+usart_write_text('AT+CMGR=?');
+usart_write(13);
+for i:=0 to 1000 do
+begin
+if usart_data_ready = 1 then
+                        begin
+                        usart_read_text(data,delim);
+                        end;
+if (Strcmp(data,'S0=1') = 0) then portb.0:=1;
+if (Strcmp(data,'S1=1') = 0) then portb.1:=1;
+if (Strcmp(data,'S2=1') = 0) then portb.2:=1;
+if (Strcmp(data,'S3=1') = 0) then portb.3:=1;
+
+if (Strcmp(data,'S0=0') = 0) then portb.0:=0;
+if (Strcmp(data,'S1=0') = 0) then portb.1:=0;
+if (Strcmp(data,'S2=0') = 0) then portb.2:=0;
+if (Strcmp(data,'S3=0') = 0) then portb.3:=0;
+
+// entrées numérique
+if (Strcmp(data,'ENTREE') = 0) then
+                               begin
+                               usart_write_text(' E0 E1 E2 E3 ');
+                               usart_write(13);
+                               for j:= 0 to 3 do
+                                 begin
+                                 usart_write_text('  ');
+                                 usart_write(portd.j+ 48);
+                                 end;
+                               usart_write(13);
+                               end;
+
+
+// entrees analogiques
+if (Strcmp(data,'ANAL0') = 0) then
+         begin
+         H:= adc_read(0);
+         H:=(h*5000)/1024 ;
+         wordtostr(h,data) ;
+         usart_write_text('ANAL 0 = ');
+         usart_write_text(data);
+         usart_write_text('mV');
+         usart_write(13);
+         end;
+if (Strcmp(data,'ANAL1') = 0) then
+         begin
+         H:= adc_read(1);
+         H:=(h*5000)/1024 ;
+         wordtostr(h,data) ;
+         usart_write_text('ANAL 1 = ');
+         usart_write_text(data);
+         usart_write_text('mV');
+         usart_write(13);
+         end;
+if (Strcmp(data,'ANAL2') = 0) then
+         begin
+         H:= adc_read(2);
+         H:=(h*5000)/1024 ;
+         wordtostr(h,data) ;
+         usart_write_text('ANAL 2 = ');
+         usart_write_text(data);
+         usart_write_text('mV');
+         usart_write(13);
+         end;
+if (Strcmp(data,'ANAL3') = 0) then
+         begin
+         H:= adc_read(3);
+         H:=(h*5000)/1024 ;
+         wordtostr(h,data) ;
+         usart_write_text('ANAL 3 = ');
+         usart_write_text(data);
+         usart_write_text('mV');
+         usart_write(13);
+         end;
+
+delay_ms(1);
+data[0]:=0;
+end;
+end;
+end.
